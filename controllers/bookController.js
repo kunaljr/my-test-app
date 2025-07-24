@@ -35,6 +35,19 @@ exports.updateBook = async (req, res, next) => {
   }
 };
 
+exports.searchBook = asyncHandler(async (req, res, next) => {  
+    const { title } = req.query;
+    if (!title) {
+      return res.status(400).json({ message: 'Title query param is required' });
+    }
+
+    const books = await Book.find({
+      title: { $regex: title, $options: 'i' }, // case-insensitive search
+    });
+
+    res.status(200).json(books);
+})
+
 // @desc    Delete book
 exports.deleteBook = asyncHandler(async (req, res, next) => {
     const book = await Book.findByIdAndDelete(req.params.id);
