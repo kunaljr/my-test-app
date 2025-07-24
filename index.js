@@ -10,7 +10,8 @@ const httpLogger = require('./middleware/httpLogger');
 const logger = require('./middleware/logger');
 const userRouter = require('./routes/user');
 const bookRouter = require('./routes/bookStore');
-// const connectDB = require('./config/db');
+const fileRouter = require('./routes/file');
+const connectDB = require('./config/db');
 const errorHandler = require('./middleware/errorHandler');
 
 const port = 3000;
@@ -23,7 +24,7 @@ const apiLimiter = rateLimit({
 
 dotenv.config();
 
-// connectDB();
+connectDB();
 
 //init app
 const app = express();
@@ -71,6 +72,7 @@ app.use(apiLimiter);
 app.use("/user",userRouter)
 // Use book routes
 app.use('/books', bookRouter);
+app.use('/file', fileRouter);
 
 app.use('/ping', require('./routes/ping'));
 
