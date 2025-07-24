@@ -22,3 +22,11 @@ exports.fileWrite = asyncHandler(async (req, res, next) => {
     });
     res.status(201).json('SUCCESS');
 });
+
+exports.fileDelete = asyncHandler(async (req, res, next) => {
+    fs.unlink('output.txt', (err) => {
+        if (err) throw err;
+        console.log('File deleted.');
+    });
+    res.status(200).json('SUCCESS');
+});
