@@ -11,6 +11,7 @@ const logger = require('./middleware/logger');
 const userRouter = require('./routes/user');
 const bookRouter = require('./routes/bookStore');
 const fileRouter = require('./routes/file');
+const streamRouter = require('./routes/stream');
 const connectDB = require('./config/db');
 const errorHandler = require('./middleware/errorHandler');
 
@@ -73,6 +74,7 @@ app.use("/user",userRouter)
 // Use book routes
 app.use('/books', bookRouter);
 app.use('/file', fileRouter);
+app.use('/stream', streamRouter);
 
 app.use('/ping', require('./routes/ping'));
 
