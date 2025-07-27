@@ -10,13 +10,16 @@ jest.mock('../models/Books'); // 👈 Mock the model
 // jest.mock('../middleware/authMiddleware', () => jest.fn((req, res, next) => next()));
 // jest.mock('../middleware/roleMiddleware', () => () => (req, res, next) => next());
 
+const generateToken = (payload, secret = process.env.JWT_SECRET) =>
+  jwt.sign(payload, secret, { expiresIn: '1h' });
+
 describe('Book Controller', () => {
   let token;
 
   beforeAll(() => {
     // simulate login: create token with admin role
     const userPayload = { id: 'user123', role: 'admin' };
-    token = jwt.sign(userPayload, process.env.JWT_SECRET, { expiresIn: '1h' });
+    token = generateToken(userPayload);
   });
 
   afterEach(() => {
@@ -78,7 +81,7 @@ describe('Book Controller', () => {
 
     it('should return 403 for non-admin role', async () => {
       const userPayload = { id: 'user456', role: 'user' };
-      const nonAdminToken = jwt.sign(userPayload, process.env.JWT_SECRET, { expiresIn: '1h' });
+      const nonAdminToken = generateToken(userPayload);
 
       const res = await request(app)
         .post('/books')
@@ -99,5 +102,76 @@ describe('Book Controller', () => {
       expect(res.body.message).toBe('Invalid or expired token');
     });
   })
+  
+  describe('PUT /books/:id', () => {
+    const bookId = 1;
+    it('should update a book', async () => {
+      const updatedBook = { title: 'Updated Book', author: 'Author A' };
+      Book.findByIdAndUpdate.mockResolvedValue(updatedBook);
 
+      const res = await request(app)
+        .put(`/books/${bookId}`)
+        .set('Authorization', `Bearer ${token}`)
+        .send(updatedBook);
+
+      expect(res.statusCode).toBe(200);
+      expect(res.body.title).toBe('Updated Book');
+      expect(Book.findByIdAndUpdate).toHaveBeenCalled();
+    });
+
+    it('🚫 should return 401 if no token is sent', async () => {
+      const res = await request(app)
+        .put(`/books/${bookId}`)
+        .send({ title: 'Updated Title', author: 'Updated Author' });
+
+      expect(res.statusCode).toBe(401);
+      expect(res.body.message).toBe('Token required');
+    });
+
+    it('🚫 should return 403 if user role is not allowed', async () => {
+      const token = generateToken({ id: 'u2', role: 'viewer' }); // not allowed
+
+      const res = await request(app)
+        .put(`/books/${bookId}`)
+        .set('Authorization', `Bearer ${token}`)
+        .send({ title: 'Updated Title', author: 'Updated Author' });
+
+      expect(res.statusCode).toBe(403);
+      expect(res.body.message).toBe('Access Denied: Insufficient role');
+    });
+
+    it('🚫 should return 422 if title is missing', async () => {
+      const token = generateToken({ id: 'u1', role: 'admin' });
+
+      const res = await request(app)
+        .put(`/books/${bookId}`)
+        .set('Authorization', `Bearer ${token}`)
+        .send({ author: 'Only Author' }); // title missing
+
+      expect(res.statusCode).toBe(422);
+      expect(Array.isArray(res.body.errors)).toBe(true);
+      expect(res.body.errors).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({ location: 'body', msg: 'Title is required', path: 'title', type: 'field' })
+        ])
+      );
+    });
+
+    it('🚫 should return 422 if author is missing', async () => {
+      const token = generateToken({ id: 'u1', role: 'admin' });
+
+      const res = await request(app)
+        .put(`/books/${bookId}`)
+        .set('Authorization', `Bearer ${token}`)
+        .send({ title: 'Only Title' }); // author missing
+
+      expect(res.statusCode).toBe(422);
+      expect(Array.isArray(res.body.errors)).toBe(true);
+      expect(res.body.errors).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({ location: 'body', msg: 'Author is required', path: 'author', type: 'field' })
+        ])
+      );
+    });
+  })
 });                                                                              
