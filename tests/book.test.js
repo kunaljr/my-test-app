@@ -1,5 +1,6 @@
 const request = require('supertest');
 const jwt = require('jsonwebtoken');
+const mongoose = require('mongoose');
 const app = require('../index');
 const Book = require('../models/Books');
 const { getBooks } = require('../controllers/bookController');
@@ -213,5 +214,9 @@ describe('Book Controller', () => {
       expect(res.statusCode).toBe(400);
       expect(res.body.message).toBe('Title query param is required');
     });
+  });
+
+  afterAll(async () => {
+    await mongoose.connection.close();
   });
 });                                                                              
