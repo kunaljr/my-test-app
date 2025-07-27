@@ -20,6 +20,6 @@ router.post('/',authenticateToken, authorizeRoles('admin'),bookValidationRules,h
 router.get('/search', searchBook);
 router.get('/:id', getBook);
 router.put('/:id',authenticateToken, authorizeRoles('admin', 'editor'), bookValidationRules,handleValidationErrors,updateBook)
-router.delete('/:id',deleteBook);
+router.delete('/:id',authenticateToken, authorizeRoles('admin'), deleteBook);
 
 module.exports = router;

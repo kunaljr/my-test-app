@@ -174,4 +174,44 @@ describe('Book Controller', () => {
       );
     });
   })
+
+  describe('DELETE /books/:id', () => {
+    it('should delete a book', async () => {
+      Book.findByIdAndDelete.mockResolvedValue({ _id: '1', title: 'Book A' });
+
+      const res = await request(app).delete('/books/1').set('Authorization', `Bearer ${token}`);
+
+      expect(res.statusCode).toBe(200);
+      expect(res.body.message).toBe('Book removed');
+    });
+
+    it('should return 404 if book not found', async () => {
+      Book.findByIdAndDelete.mockResolvedValue(null);
+
+      const res = await request(app).delete('/books/1').set('Authorization', `Bearer ${token}`);
+
+      expect(res.statusCode).toBe(404);
+      expect(res.body.message).toBe('Book not found');
+    });
+  });
+
+  describe('GET /books/search?title=', () => {
+    it('should search books by title', async () => {
+      const foundBooks = [
+        { title: 'Node.js in Action', author: 'Someone' },
+        { title: 'Node Cookbook', author: 'Another' }
+      ];
+      Book.find.mockResolvedValue(foundBooks);
+
+      const res = await request(app).get('/books/search?title=node');
+      expect(res.statusCode).toBe(200);
+      expect(res.body).toEqual(foundBooks);
+    });
+
+    it('should return 400 if title query param is missing', async () => {
+      const res = await request(app).get('/books/search');
+      expect(res.statusCode).toBe(400);
+      expect(res.body.message).toBe('Title query param is required');
+    });
+  });
 });                                                                              
