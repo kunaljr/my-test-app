@@ -4,6 +4,7 @@ const helmet = require('helmet');
 const cors = require('cors')
 // const csrf = require('csurf');
 const cookieParser = require('cookie-parser')
+const compression = require('compression');
 const session = require('./middleware/sessionMiddleware');
 const httpLogger = require('./middleware/httpLogger');
 const logger = require('./middleware/logger');
@@ -35,7 +36,17 @@ logger.info('App started');
 
 app.use(cookieParser());
 app.use(session);
-
+app.use(compression({
+    level: 6,              // Compression level (1-9)
+    threshold: 1024,       // Only compress responses bigger than 1KB
+    filter: (req, res) => {
+        if (req.headers['x-no-compression']) {
+        // Will not compress responses with this request header
+        return false;
+        }
+        return compression.filter(req, res);
+    }
+}))
 // Security middleware
 app.use(helmet())
 app.use(cors()); // Allow all origins (dev mode)
@@ -52,7 +63,7 @@ app.use(rateLimiter);
 // app.use(csrfProtection);
 
 // app.get('/form', (req, res) => {
-//   res.json({ csrfToken: req.csrfToken() });
+//   res.json({ csrfToken: req.csrfToken() });`
 // });
 
 app.use("/user",userRouter)
