@@ -1,5 +1,6 @@
 const Book = require('../models/Books')
 const asyncHandler = require('../utils/asyncHandler');
+const redisClient = require('../config/redis');
 
 // @desc    Get all books
 exports.getBooks = asyncHandler(async (req, res, next) => {
@@ -9,8 +10,21 @@ exports.getBooks = asyncHandler(async (req, res, next) => {
 
 // @desc    Get single book
 exports.getBook = asyncHandler(async (req, res, next) => {
+
+    const cacheKey = `book:${req.params.id}`;
+    const cached = await redisClient.get(cacheKey);
+
+    if (cached) {
+      console.log('⚡ Serving from Redis Cache');
+      return res.status(200).json(JSON.parse(cached));
+    }
+
     const book = await Book.findById(req.params.id);
     if (!book) return res.status(404).json({ message: 'Book not found' });
+
+    // Cache the result with an expiration of 1 hour
+    await redisClient.setEx(cacheKey, 3600, JSON.stringify(book));
+    
     res.json(book);
 });
 
