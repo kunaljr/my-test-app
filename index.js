@@ -79,7 +79,7 @@ app.get("/", (req, res) => {
     res.send('Hello World');
 })
 
-console.log('CHECKING CICD 1')
+console.log('CHECKING CICD 2')
 // Error Handler
 app.use(errorHandler);
 
