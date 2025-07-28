@@ -21,6 +21,7 @@ jobs:
           --health-retries 5
           
     env:
+      PORT: ${{secrets.PORT}}
       NODE_ENV: ${{ secrets.NODE_ENV }}
       JWT_SECRET: ${{ secrets.JWT_SECRET }}
       MONDODB_NAME: ${{ secrets.MONDODB_NAME }}
