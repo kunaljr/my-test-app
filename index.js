@@ -1,11 +1,10 @@
 const express = require('express');
 const dotenv = require('dotenv');
 const helmet = require('helmet');
-const rateLimit = require('express-rate-limit')
 const cors = require('cors')
 // const csrf = require('csurf');
 const cookieParser = require('cookie-parser')
-const session = require('express-session');
+const session = require('./middleware/sessionMiddleware');
 const httpLogger = require('./middleware/httpLogger');
 const logger = require('./middleware/logger');
 const userRouter = require('./routes/user');
@@ -14,14 +13,9 @@ const fileRouter = require('./routes/file');
 const streamRouter = require('./routes/stream');
 const connectDB = require('./config/db');
 const errorHandler = require('./middleware/errorHandler');
+const rateLimiter = require('./middleware/rateLimiter');
 
 const port = 3000;
-
-const apiLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100, // max 100 requests per IP
-  message: 'Too many requests from this IP, please try again later.',
-});
 
 dotenv.config();
 
@@ -40,16 +34,7 @@ app.use(httpLogger);
 logger.info('App started');
 
 app.use(cookieParser());
-app.use(session({
-  secret: 'yourSecretKey', // 🔐 Change to a secure key in production
-  resave: false,
-  saveUninitialized: true,
-  cookie: {
-    httpOnly: true,
-    maxAge: 1000 * 60 * 60, // 1 hour
-    secure: process.env.NODE_ENV === 'production', // HTTPS only in production
-  },
-}));
+app.use(session);
 
 // Security middleware
 app.use(helmet())
@@ -60,7 +45,7 @@ app.use(cors()); // Allow all origins (dev mode)
 //   methods: ['GET', 'POST', 'PUT', 'DELETE'],
 //   credentials: true
 // }));
-app.use(apiLimiter);
+app.use(rateLimiter);
 
 // CSRF middleware
 // const csrfProtection = csrf({ cookie: { httpOnly: true, sameSite: 'strict' } });
