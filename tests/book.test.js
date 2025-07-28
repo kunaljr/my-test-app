@@ -51,7 +51,7 @@ describe('Book Controller', () => {
     it('Should return 404 if book not found', async () => {
       Book.findById.mockResolvedValue(null)
 
-      const res = await request(app).get('/books/1');
+      const res = await request(app).get('/books/null');
       expect(res.statusCode).toBe(404)
       expect(res.body.message).toBe('Book not found')
     })
