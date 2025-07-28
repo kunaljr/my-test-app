@@ -35,19 +35,16 @@ exports.createBook = asyncHandler(async (req, res, next) => {
 });
 
 // @desc    Update book
-exports.updateBook = async (req, res, next) => {
-  try {
+exports.updateBook = asyncHandler(async (req, res, next) => {
     const book = await Book.findByIdAndUpdate(
       req.params.id,
       req.body,
       { new: true, runValidators: true }
     );
     if (!book) return res.status(404).json({ message: 'Book not found' });
+    await redisClient.del(`book:${req.params.id}`);
     res.json(book);
-  } catch (err) {
-    next(err);
-  }
-};
+});
 
 exports.searchBook = asyncHandler(async (req, res, next) => {  
     const { title } = req.query;
@@ -66,6 +63,7 @@ exports.searchBook = asyncHandler(async (req, res, next) => {
 exports.deleteBook = asyncHandler(async (req, res, next) => {
     const book = await Book.findByIdAndDelete(req.params.id);
     if (!book) return res.status(404).json({ message: 'Book not found' });
+    await redisClient.del(`book:${req.params.id}`);
     res.json({ message: 'Book removed' });
 });
 
