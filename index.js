@@ -16,9 +16,10 @@ const connectDB = require('./config/db');
 const errorHandler = require('./middleware/errorHandler');
 const rateLimiter = require('./middleware/rateLimiter');
 
-const port = process.env.PORT || 3000;;
 
 dotenv.config();
+
+const port = process.env.PORT || 3000;
 
 connectDB();
 
