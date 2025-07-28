@@ -83,8 +83,8 @@ console.log('CHECKING CICD')
 // Error Handler
 app.use(errorHandler);
 
-app.listen(port, () => {
+const server = app.listen(port, () => {
     console.log(`Server Running On Port: ${port}`)
 })
 
-module.exports = app;
+module.exports = { app, server };

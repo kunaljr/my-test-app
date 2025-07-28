@@ -1,7 +1,7 @@
 const request = require('supertest');
 const jwt = require('jsonwebtoken');
 const mongoose = require('mongoose');
-const app = require('../index');
+const { app, server } = require('../index');
 const Book = require('../models/Books');
 const redisClient = require('../config/redis');
 const { getBooks } = require('../controllers/bookController');
@@ -220,5 +220,6 @@ describe('Book Controller', () => {
   afterAll(async () => {
     await mongoose.connection.close();
     await redisClient.quit();
+    server.close();
   });
 });                                                                              
