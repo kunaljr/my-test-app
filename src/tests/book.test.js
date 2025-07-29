@@ -3,7 +3,7 @@ const jwt = require('jsonwebtoken');
 const mongoose = require('mongoose');
 const { app, server } = require('../index');
 const Book = require('../models/Books');
-// const redisClient = require('../config/redis');
+const redisClient = require('../config/redis');
 const { getBooks } = require('../controllers/bookController');
 
 jest.mock('../models/Books'); // 👈 Mock the model
@@ -219,7 +219,7 @@ describe('Book Controller', () => {
 
   afterAll(async () => {
     await mongoose.connection.close();
-    // await redisClient.quit();
+    await redisClient.quit();
     server.close();
   });
 });                                                                              
