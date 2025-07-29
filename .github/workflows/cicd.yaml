@@ -2,7 +2,7 @@ name: CI/CD to GCP Cloud Run
 
 on:
   push:
-    branches: dev
+    branches: main
 
 jobs:
   deploy:
@@ -63,4 +63,4 @@ jobs:
             --platform=managed \
             --region=${{ secrets.GCP_REGION }} \
             --allow-unauthenticated \
-            --set-env-vars MONDODB_NAME=sample_mflix,JWT_SECRET=123456,NODE_ENV=test,MONGO_URI=mongodb+srv://kunal:hH8z77rdM6zyulkg@cluster0.xkazoxw.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0,PORT=3000
+            --set-env-vars MONDODB_NAME=sample_mflix,JWT_SECRET=123456,NODE_ENV=test,MONGO_URI=<MONGO_URL>,PORT=3000
